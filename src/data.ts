@@ -571,17 +571,27 @@ function doGet(e) {
 
 function doPost(e) {
   try {
-    const postData = JSON.parse(e.postData.contents);
+    let postData = {};
+    if (e && e.postData && e.postData.contents) {
+      try {
+        postData = JSON.parse(e.postData.contents);
+      } catch (parseError) {
+        postData = e.parameter || {};
+      }
+    } else if (e && e.parameter) {
+      postData = e.parameter;
+    }
+
     const spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
     const historySheet = spreadsheet.getSheetByName("History") || createHistorySheet(spreadsheet);
     
     // Ambil parameter data
     const timestamp = new Date();
-    const action = postData.action || "LOCK_ANTENNA";
+    const action = postData.action || "SELECT_STATION";
     const userLocation = postData.userLocation || "-";
     const targetMux = postData.targetMux || "-";
-    const distance = postData.distance || 0;
-    const bearing = postData.bearing || 0;
+    const distance = parseFloat(postData.distance) || 0;
+    const bearing = parseInt(postData.bearing) || 0;
     
     // Append baris baru
     historySheet.appendRow([
@@ -612,13 +622,13 @@ function createHistorySheet(spreadsheet) {
   if (!sheet) {
     sheet = spreadsheet.insertSheet("History");
     
-    // Set format Header
-    const headers = ["Waktu (Timestamp)", "Aksi (Action)", "Lokasi User", "Target MUX TV", "Jarak (km)", "Sinyal Azimuth (Sudut)"];
+    // Set format Header agar sesuai dengan screenshot (lowercase english)
+    const headers = ["timestamp", "action", "userLocation", "targetMux", "distance", "bearing"];
     sheet.getRange(1, 1, 1, 6).setValues([headers]);
     
     // Kasih styling header dikit biar rapi bray
     const headerRange = sheet.getRange("A1:F1");
-    headerRange.setBackground("#111827") // Dark Carbon background
+    headerRange.setBackground("#0f172a") // Dark slate background
                .setFontColor("#FFFFFF") // White text
                .setFontWeight("bold")
                .setHorizontalAlignment("center");

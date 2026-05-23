@@ -60,7 +60,10 @@ export default function App() {
   
   // Google Sheets integration state
   const [appScriptUrl, setAppScriptUrl] = useState<string>(() => {
-    return localStorage.getItem('tv_antenna_script_url') || '';
+    return localStorage.getItem('tv_antenna_script_url') || 
+      ((import.meta as any).env.VITE_WEB_APP_URL as string) || 
+      ((import.meta as any).env.WEB_APP_URL as string) || 
+      'https://script.google.com/macros/s/AKfycbwdXykYv4Gr_PhL3tItdnbcEznemgDMpZiVVJVZ7IHIhxcei6Uwr6x2KB1nRcSDxjixXA/exec';
   });
   
   const [logs, setLogs] = useState<LogItem[]>(() => {
@@ -150,6 +153,52 @@ export default function App() {
     else if (city.name.includes('Makassar')) setCityFilter('Sulawesi Selatan');
 
     showToast(`📍 Berhasil pindah lokasi simulasi ke: ${city.name}`, 'success');
+  };
+
+  // Automatically log selecting a station to Google Sheets on click
+  const handleSelectStation = async (station: TVStation) => {
+    setSelectedStation(station);
+    
+    const dist = calculateDistance(
+      userLocation.latitude,
+      userLocation.longitude,
+      station.latitude,
+      station.longitude
+    );
+    const bearing = calculateBearing(
+      userLocation.latitude,
+      userLocation.longitude,
+      station.latitude,
+      station.longitude
+    );
+
+    const newLog: LogItem = {
+      timestamp: new Date().toISOString(),
+      action: 'SELECT_STATION',
+      userLocation: `${userLocation.latitude.toFixed(5)}, ${userLocation.longitude.toFixed(5)} (${activeCityName})`,
+      targetMux: station.name,
+      distance: Number(dist.toFixed(2)),
+      bearing: Math.round(bearing),
+      synchronized: false
+    };
+
+    if (appScriptUrl) {
+      try {
+        await fetch(appScriptUrl, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(newLog)
+        });
+        newLog.synchronized = true;
+      } catch (err) {
+        console.error('Failed to log select event to Google Sheets:', err);
+      }
+    }
+    
+    setLogs(prev => [newLog, ...prev]);
   };
 
   // Trigger Sheet integration via fetch POST
@@ -404,7 +453,7 @@ export default function App() {
                   return (
                     <div
                       key={station.id}
-                      onClick={() => setSelectedStation(station)}
+                      onClick={() => handleSelectStation(station)}
                       className={`p-3.5 rounded-xl border cursor-pointer transition-all duration-200 select-none ${
                         isSelected
                           ? 'bg-white text-[#0a0f18] border-white'
@@ -524,7 +573,7 @@ export default function App() {
                 stations={INDONESIAN_TV_STATIONS}
                 userLocation={userLocation}
                 selectedStation={selectedStation}
-                onSelectStation={setSelectedStation}
+                onSelectStation={handleSelectStation}
               />
             </div>
 
