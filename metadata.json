@@ -1,0 +1,10 @@
+{
+  "name": "Arah Sinyal Antena TV Digital",
+  "description": "Aplikasi penunjuk arah sinyal antena TV Digital (DVB-T2) Indonesia dengan kompas dinamis, peta, dan pencatatan history ke Google Sheets.",
+  "requestFramePermissions": [
+    "geolocation"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
