@@ -68,10 +68,20 @@ export default function App() {
   
   // Google Sheets integration state
   const [appScriptUrl, setAppScriptUrl] = useState<string>(() => {
-    return localStorage.getItem('tv_antenna_script_url_v2') || 
+    // Check older & current localstorage cache
+    const cached = localStorage.getItem('tv_antenna_script_url_v2') || localStorage.getItem('tv_antenna_script_url');
+    const defaultUrl = 'https://script.google.com/macros/s/AKfycbwdXykYv4Gr_PhL3tItdnbcEznemgDMpZiVVJVZ7IHIhxcei6Uwr6x2KB1nRcSDxjixXA/exec';
+    
+    // Automatically migrate and clean up if the cached URL contains the old /dev link or matches the old ID
+    if (cached && (cached.includes('AKfycbzx44R6Ly5iEHa3mUOJi--7FpxuCq-vjf8OlmPJFruj') || cached.includes('/dev'))) {
+      localStorage.setItem('tv_antenna_script_url_v2', defaultUrl);
+      return defaultUrl;
+    }
+    
+    return cached || 
       ((import.meta as any).env.VITE_WEB_APP_URL as string) || 
       ((import.meta as any).env.WEB_APP_URL as string) || 
-      'https://script.google.com/macros/s/AKfycbwdXykYv4Gr_PhL3tItdnbcEznemgDMpZiVVJVZ7IHIhxcei6Uwr6x2KB1nRcSDxjixXA/exec';
+      defaultUrl;
   });
   
   const [logs, setLogs] = useState<LogItem[]>(() => {
