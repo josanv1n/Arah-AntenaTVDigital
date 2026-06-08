@@ -3,12 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { FileSpreadsheet, RefreshCw, Trash2, ExternalLink } from 'lucide-react';
+import { FileSpreadsheet, RefreshCw } from 'lucide-react';
 
 interface SheetLog {
   timestamp: string;
   action: string;
   userLocation: string;
+  kota?: string;
   targetMux: string;
   distance: number;
   bearing: number;
@@ -27,12 +28,8 @@ export default function SheetsPanel({
   appScriptUrl,
   onUpdateUrl,
   logs,
-  onClearLogs,
   onManualSync,
 }: SheetsPanelProps) {
-  const spreadsheetId = '1jHxBbN5zacD9hBClTHTiimRk2cVCCxlYOXHg9OBFU9w';
-  const spreadsheetLink = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/edit`;
-
   return (
     <div className="cyber-panel p-5 rounded-2xl border border-slate-200/80 shadow-lg flex flex-col h-full text-slate-800 min-h-[340px]">
       {/* Title & Spreadsheet Quick Link */}
@@ -52,7 +49,7 @@ export default function SheetsPanel({
           {logs.length === 0 ? (
             <div className="text-center py-10 text-xs text-slate-400 font-display border border-slate-100 rounded-xl bg-slate-50/50 flex flex-col items-center justify-center gap-2 min-h-[160px]">
               <span className="text-2xl mt-1">📡</span>
-              <span>Belum ada lock MUX terekam. Sejajarkan sinyal dan tekan 'Kunci Sinyal'!</span>
+              <span>Belum ada stasiun terpilih. Klik stasiun TV di samping untuk mencatat secara otomatis!</span>
             </div>
           ) : (
             <div className="border border-slate-200/60 rounded-xl overflow-hidden bg-white">
@@ -60,6 +57,7 @@ export default function SheetsPanel({
                 <thead className="bg-slate-50 text-slate-500 border-b border-slate-200/80 sticky top-0">
                   <tr>
                     <th className="px-3 py-2 font-bold">Waktu</th>
+                    <th className="px-2 py-2 font-bold">Kota</th>
                     <th className="px-2 py-2 font-bold">Mux Target</th>
                     <th className="px-2 py-2 font-bold">Jarak</th>
                     <th className="px-2 py-2 font-bold">Sudut</th>
@@ -72,11 +70,14 @@ export default function SheetsPanel({
                       <td className="px-3 py-2 whitespace-nowrap text-slate-400 text-[9px]">
                         {new Date(log.timestamp).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
                       </td>
+                      <td className="px-2 py-2 font-bold text-indigo-600 truncate max-w-[80px]" title={log.kota || '-'}>
+                        {log.kota || '-'}
+                      </td>
                       <td className="px-2 py-2 font-bold truncate max-w-[110px] text-slate-800" title={log.targetMux}>
                         {log.targetMux}
                       </td>
                       <td className="px-2 py-2 text-slate-600 whitespace-nowrap">
-                        {log.distance.toFixed(1)} km
+                        {typeof log.distance === 'number' ? `${log.distance.toFixed(1)} km` : log.distance}
                       </td>
                       <td className="px-2 py-2 text-emerald-600 font-bold">
                         {log.bearing}°
@@ -95,25 +96,16 @@ export default function SheetsPanel({
         </div>
 
         {/* Action Controls for History logs */}
-        {logs.length > 0 && (
-          <div className="flex items-center justify-between mt-4 pt-3.5 border-t border-slate-100">
-            <button
-              onClick={onManualSync}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-950 rounded-lg text-[10px] font-mono font-bold transition-all border border-slate-200"
-              title="Periksa koneksi sync dengan Apps Script"
-            >
-              <RefreshCw className="w-3 h-3" />
-              <span>Koneksi Sync</span>
-            </button>
-            <button
-              onClick={onClearLogs}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 hover:text-red-700 rounded-lg text-[10px] font-mono font-bold transition-all border border-red-200"
-            >
-              <Trash2 className="w-3 h-3" />
-              <span>Kosongkan Log</span>
-            </button>
-          </div>
-        )}
+        <div className="flex items-center justify-end mt-4 pt-3.5 border-t border-slate-100">
+          <button
+            onClick={onManualSync}
+            className="flex items-center gap-1.5 px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white hover:text-white rounded-lg text-[10px] font-mono font-bold transition-all border border-slate-950 shadow-sm cursor-pointer"
+            title="Tarik data terbaru dari Google Sheets"
+          >
+            <RefreshCw className="w-3.5 h-3.5" />
+            <span>Refresh</span>
+          </button>
+        </div>
       </div>
     </div>
   );

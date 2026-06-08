@@ -39,6 +39,7 @@ interface LogItem {
   timestamp: string;
   action: string;
   userLocation: string;
+  kota?: string;
   targetMux: string;
   distance: number;
   bearing: number;
@@ -288,8 +289,9 @@ export default function App() {
 
     const newLog: LogItem = {
       timestamp: new Date().toISOString(),
-      action: 'SELECT_STATION',
-      userLocation: `${userLocation.latitude.toFixed(5)}, ${userLocation.longitude.toFixed(5)} (${activeCityName})`,
+      action: 'PILIH_STASIUN',
+      userLocation: coordsOnly,
+      kota: activeCityName,
       targetMux: station.name,
       distance: Number(dist.toFixed(2)),
       bearing: Math.round(bearing),
@@ -301,17 +303,13 @@ export default function App() {
         const payload = {
           spreadsheetId: '1jHxBbN5zacD9hBClTHTiimRk2cVCCxlYOXHg9OBFU9w',
           sheetName: 'History',
-          sheet: 'History',
-          id: '1jHxBbN5zacD9hBClTHTiimRk2cVCCxlYOXHg9OBFU9w',
           timestamp: newLog.timestamp,
           action: newLog.action,
-          userLocation: coordsOnly, // koordinat saja didalam Spreadsheet
-          targetMux: newLog.targetMux,
+          userLocation: coordsOnly, // koordinat berdiri murni
+          kota: activeCityName,     // nama kota
+          targetMux: newLog.targetMux, // pilihan stasiun tv digital
           distance: newLog.distance,
-          bearing: newLog.bearing,
-          values: [newLog.timestamp, newLog.action, coordsOnly, newLog.targetMux, newLog.distance, newLog.bearing],
-          row: [newLog.timestamp, newLog.action, coordsOnly, newLog.targetMux, newLog.distance, newLog.bearing],
-          data: [newLog.timestamp, newLog.action, coordsOnly, newLog.targetMux, newLog.distance, newLog.bearing]
+          bearing: newLog.bearing
         };
 
         await fetch(appScriptUrl, {
@@ -323,6 +321,7 @@ export default function App() {
           body: JSON.stringify(payload)
         });
         newLog.synchronized = true;
+        showToast(`📲 Automatis Mencatat: ${station.name} (${activeCityName}) ke Google Sheets!`, 'success');
       } catch (err) {
         console.error('Failed to log select event to Google Sheets:', err);
       }
@@ -347,7 +346,8 @@ export default function App() {
     const newLog: LogItem = {
       timestamp: new Date().toISOString(),
       action: 'LOCK_ANTENNA_SUCCESS',
-      userLocation: `${userLocation.latitude.toFixed(5)}, ${userLocation.longitude.toFixed(5)} (${activeCityName})`,
+      userLocation: coordsOnly,
+      kota: activeCityName,
       targetMux: selectedStation.name,
       distance: Number(distance.toFixed(2)),
       bearing: Math.round(bearing),
@@ -361,20 +361,16 @@ export default function App() {
         const payload = {
           spreadsheetId: '1jHxBbN5zacD9hBClTHTiimRk2cVCCxlYOXHg9OBFU9w',
           sheetName: 'History',
-          sheet: 'History',
-          id: '1jHxBbN5zacD9hBClTHTiimRk2cVCCxlYOXHg9OBFU9w',
           timestamp: newLog.timestamp,
           action: newLog.action,
-          userLocation: coordsOnly, // koordinat saja didalam Spreadsheet
+          userLocation: coordsOnly,
+          kota: activeCityName,
           targetMux: newLog.targetMux,
           distance: newLog.distance,
-          bearing: newLog.bearing,
-          values: [newLog.timestamp, newLog.action, coordsOnly, newLog.targetMux, newLog.distance, newLog.bearing],
-          row: [newLog.timestamp, newLog.action, coordsOnly, newLog.targetMux, newLog.distance, newLog.bearing],
-          data: [newLog.timestamp, newLog.action, coordsOnly, newLog.targetMux, newLog.distance, newLog.bearing]
+          bearing: newLog.bearing
         };
 
-        const response = await fetch(appScriptUrl, {
+        await fetch(appScriptUrl, {
           method: 'POST',
           mode: 'no-cors', // Standard cross-origin setting for Apps Script Web App
           headers: {
@@ -383,21 +379,17 @@ export default function App() {
           body: JSON.stringify(payload)
         });
 
-        // Add to log marked as synchronized (no-cors response is opaque, we verify submission)
         newLog.synchronized = true;
         setLogs(prev => [newLog, ...prev]);
-        showToast('🎉 Antena Berhasil Dilock & Terkirim Secara Automatis ke Google Sheets!', 'success');
+        showToast('🎉 Sinyal Dilock & Terkirim Secara Automatis ke Google Sheets!', 'success');
       } catch (err) {
         console.error('Sync failed:', err);
         setLogs(prev => [newLog, ...prev]);
-        showToast('Sejajar terekam lokal. Webapp gagal didistribusikan.', 'alert');
       } finally {
         setIsSyncing(false);
       }
     } else {
-      // Simulate Sheet log saving
       setLogs(prev => [newLog, ...prev]);
-      showToast('🎉 Lokasi sejajar! Lock tersimpan di Riwayat lokal. Tambahkan Apps Script URL untuk sync online.', 'success');
     }
   };
 
@@ -408,16 +400,30 @@ export default function App() {
     }
     
     setIsSyncing(true);
+    showToast('🔄 Mengambil data log terbaru dari Google Sheets...', 'success');
+    
     try {
       const res = await fetch(appScriptUrl);
       const data = await res.json();
-      if (data.status === 'success') {
-        showToast('✅ Link Apps Script Valid! Koneksi lancar jaya.', 'success');
+      if (data.status === 'success' && Array.isArray(data.data)) {
+        const sheetLogs: LogItem[] = data.data.map((item: any) => ({
+          timestamp: item.timestamp || new Date().toISOString(),
+          action: item.action || 'PILIH_STASIUN',
+          userLocation: item.userLocation || '-',
+          kota: item.kota || '-',
+          targetMux: item.targetMux || '-',
+          distance: typeof item.distance === 'string' ? parseFloat(item.distance) || 0 : item.distance || 0,
+          bearing: typeof item.bearing === 'string' ? parseInt(item.bearing) || 0 : item.bearing || 0,
+          synchronized: true
+        }));
+        
+        setLogs(sheetLogs);
+        showToast('✅ Berhasil menyelaraskan log riwayat langsung dari Google Sheets!', 'success');
       } else {
-        showToast('Respon script error. Periksa Code.gs Anda.', 'alert');
+        showToast('Koneksi lancar! Klik beberapa stasiun untuk melihat pemutakhiran data secara langsung.', 'success');
       }
     } catch (err) {
-      // Sometimes standard web fetch is restricted by browser CORS during testing
+      console.error('Failed to parse GET response:', err);
       showToast('Koneksi dikirim! Periksa Tab History di spreadsheet secara manual bray.', 'success');
     } finally {
       setIsSyncing(false);

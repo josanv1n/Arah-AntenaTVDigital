@@ -362,20 +362,7 @@ export default function CyberCompass({
         </p>
       </div>
 
-      {/* UI Lock Trigger Action */}
-      {selectedStation && (
-        <button
-          onClick={() => onLockConfirmed?.(targetBearing, normalizedDiff)}
-          className={`mt-4 w-full font-display py-2.5 rounded-lg font-bold text-xs uppercase tracking-wide transition-all duration-300 ${
-            isAligned
-              ? 'bg-slate-900 text-white hover:bg-slate-800 shadow-md active:scale-98'
-              : 'bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed'
-          }`}
-          disabled={!isAligned}
-        >
-          {isAligned ? 'Kunci & Catat Ke Google Sheets 🔒' : 'Luruskan Sinyal Dulu'}
-        </button>
-      )}
+
 
       {permissionError && (
         <div className="mt-2 text-[9px] text-red-600 font-mono text-center bg-red-50 border border-red-200 p-2 rounded-lg">
