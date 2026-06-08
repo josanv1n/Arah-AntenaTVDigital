@@ -40,6 +40,7 @@ interface LogItem {
   action: string;
   userLocation: string;
   kota?: string;
+  address?: string;
   targetMux: string;
   distance: number;
   bearing: number;
@@ -291,6 +292,7 @@ export default function App() {
       timestamp: new Date().toISOString(),
       action: 'PILIH_STASIUN',
       userLocation: coordsOnly,
+      address: address,
       kota: activeCityName,
       targetMux: station.name,
       distance: Number(dist.toFixed(2)),
@@ -306,6 +308,7 @@ export default function App() {
           timestamp: newLog.timestamp,
           action: newLog.action,
           userLocation: coordsOnly, // koordinat berdiri murni
+          address: address,         // Alamat Lengkap + Kota
           kota: activeCityName,     // nama kota
           targetMux: newLog.targetMux, // pilihan stasiun tv digital
           distance: newLog.distance,
@@ -347,6 +350,7 @@ export default function App() {
       timestamp: new Date().toISOString(),
       action: 'LOCK_ANTENNA_SUCCESS',
       userLocation: coordsOnly,
+      address: address,
       kota: activeCityName,
       targetMux: selectedStation.name,
       distance: Number(distance.toFixed(2)),
@@ -364,6 +368,7 @@ export default function App() {
           timestamp: newLog.timestamp,
           action: newLog.action,
           userLocation: coordsOnly,
+          address: address,         // Alamat Lengkap + Kota
           kota: activeCityName,
           targetMux: newLog.targetMux,
           distance: newLog.distance,
@@ -410,6 +415,7 @@ export default function App() {
           timestamp: item.timestamp || new Date().toISOString(),
           action: item.action || 'PILIH_STASIUN',
           userLocation: item.userLocation || '-',
+          address: item.address || '-',
           kota: item.kota || '-',
           targetMux: item.targetMux || '-',
           distance: typeof item.distance === 'string' ? parseFloat(item.distance) || 0 : item.distance || 0,

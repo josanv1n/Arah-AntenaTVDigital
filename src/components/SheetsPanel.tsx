@@ -11,6 +11,7 @@ interface SheetLog {
   action: string;
   userLocation: string;
   kota?: string;
+  address?: string;
   targetMux: string;
   distance: number;
   bearing: number;
@@ -129,8 +130,13 @@ export default function SheetsPanel({
                       <td className="px-3 py-2 whitespace-nowrap text-slate-400 text-[9px]">
                         {new Date(log.timestamp).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
                       </td>
-                      <td className="px-2 py-2 font-bold text-indigo-600 truncate max-w-[80px]" title={log.kota || '-'}>
-                        {log.kota || '-'}
+                      <td className="px-2 py-2 text-indigo-600 truncate max-w-[130px]" title={log.address || log.kota || '-'}>
+                        <div className="font-bold">{log.kota || '-'}</div>
+                        {log.address && (
+                          <div className="text-[8px] font-normal text-slate-400 truncate max-w-[120px]" title={log.address}>
+                            {log.address}
+                          </div>
+                        )}
                       </td>
                       <td className="px-2 py-2 font-bold truncate max-w-[110px] text-slate-800" title={log.targetMux}>
                         {log.targetMux}
