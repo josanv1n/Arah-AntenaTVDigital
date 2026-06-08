@@ -68,7 +68,7 @@ export default function App() {
   
   // Google Sheets integration state
   const [appScriptUrl, setAppScriptUrl] = useState<string>(() => {
-    return localStorage.getItem('tv_antenna_script_url') || 
+    return localStorage.getItem('tv_antenna_script_url_v2') || 
       ((import.meta as any).env.VITE_WEB_APP_URL as string) || 
       ((import.meta as any).env.WEB_APP_URL as string) || 
       'https://script.google.com/macros/s/AKfycbwdXykYv4Gr_PhL3tItdnbcEznemgDMpZiVVJVZ7IHIhxcei6Uwr6x2KB1nRcSDxjixXA/exec';
@@ -92,7 +92,7 @@ export default function App() {
   // Handle URL change
   const handleUpdateAppScriptUrl = (url: string) => {
     setAppScriptUrl(url);
-    localStorage.setItem('tv_antenna_script_url', url);
+    localStorage.setItem('tv_antenna_script_url_v2', url);
     showToast('Link Google Apps Script berhasil disimpan!', 'success');
   };
 
