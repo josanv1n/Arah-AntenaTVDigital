@@ -286,12 +286,12 @@ export default function App() {
       station.longitude
     );
 
-    const coordsOnly = `${userLocation.latitude.toFixed(5)}, ${userLocation.longitude.toFixed(5)}`;
+    const coordsLink = `http://maps.google.com/?q=${userLocation.latitude.toFixed(5)},${userLocation.longitude.toFixed(5)}`;
 
     const newLog: LogItem = {
       timestamp: new Date().toISOString(),
       action: 'PILIH_STASIUN',
-      userLocation: coordsOnly,
+      userLocation: coordsLink,
       address: address,
       kota: activeCityName,
       targetMux: station.name,
@@ -307,7 +307,7 @@ export default function App() {
           sheetName: 'History',
           timestamp: newLog.timestamp,
           action: newLog.action,
-          userLocation: coordsOnly, // koordinat berdiri murni
+          userLocation: coordsLink, // Google Maps Link
           address: address,         // Alamat Lengkap + Kota
           kota: activeCityName,     // nama kota
           targetMux: newLog.targetMux, // pilihan stasiun tv digital
@@ -344,12 +344,12 @@ export default function App() {
       selectedStation.longitude
     );
 
-    const coordsOnly = `${userLocation.latitude.toFixed(5)}, ${userLocation.longitude.toFixed(5)}`;
+    const coordsLink = `http://maps.google.com/?q=${userLocation.latitude.toFixed(5)},${userLocation.longitude.toFixed(5)}`;
 
     const newLog: LogItem = {
       timestamp: new Date().toISOString(),
       action: 'LOCK_ANTENNA_SUCCESS',
-      userLocation: coordsOnly,
+      userLocation: coordsLink,
       address: address,
       kota: activeCityName,
       targetMux: selectedStation.name,
@@ -367,7 +367,7 @@ export default function App() {
           sheetName: 'History',
           timestamp: newLog.timestamp,
           action: newLog.action,
-          userLocation: coordsOnly,
+          userLocation: coordsLink,
           address: address,         // Alamat Lengkap + Kota
           kota: activeCityName,
           targetMux: newLog.targetMux,

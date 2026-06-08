@@ -118,6 +118,7 @@ export default function SheetsPanel({
                   <tr>
                     <th className="px-3 py-2 font-bold">Waktu</th>
                     <th className="px-2 py-2 font-bold">Kota</th>
+                    <th className="px-2 py-2 font-bold">Peta</th>
                     <th className="px-2 py-2 font-bold">Mux Target</th>
                     <th className="px-2 py-2 font-bold">Jarak</th>
                     <th className="px-2 py-2 font-bold">Sudut</th>
@@ -136,6 +137,21 @@ export default function SheetsPanel({
                           <div className="text-[8px] font-normal text-slate-400 truncate max-w-[120px]" title={log.address}>
                             {log.address}
                           </div>
+                        )}
+                      </td>
+                      <td className="px-2 py-2 whitespace-nowrap">
+                        {log.userLocation && log.userLocation !== '-' ? (
+                          <a
+                            href={log.userLocation.startsWith('http') ? log.userLocation : `http://maps.google.com/?q=${encodeURIComponent(log.userLocation)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-0.5 text-rose-600 hover:text-rose-800 font-bold hover:underline bg-rose-50 px-2 py-0.5 rounded border border-rose-200/50 transition-colors"
+                            title="Buka lokasi koordinat di Google Maps"
+                          >
+                            <span>📍 Peta</span>
+                          </a>
+                        ) : (
+                          <span className="text-slate-400">-</span>
                         )}
                       </td>
                       <td className="px-2 py-2 font-bold truncate max-w-[110px] text-slate-800" title={log.targetMux}>
