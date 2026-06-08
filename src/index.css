@@ -51,67 +51,68 @@
   }
 }
 
-/* Custom background grid pattern for space-tech visual */
+/* Custom background grid pattern for light tech visual */
 .cyber-grid {
   background-image: 
-    linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-  background-size: 40px 40px;
+    linear-gradient(to right, rgba(15, 23, 42, 0.02) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(15, 23, 42, 0.02) 1px, transparent 1px);
+  background-size: 32px 32px;
 }
 
-/* Glassmorphism Cyber Cards with White Glowing Border effects */
+/* Glassmorphism Cyber Cards with Elegant Subtle Shadow effects */
 .cyber-panel {
-  background: rgba(13, 19, 31, 0.85);
+  background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(148, 163, 184, 0.15);
+  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.04), 0 2px 8px -1px rgba(15, 23, 42, 0.02);
 }
 
 .cyber-panel-glow {
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(15, 23, 42, 0.15);
+  box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.08);
 }
 
 .text-glow {
-  text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+  text-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
 }
 
 .text-glow-green {
-  text-shadow: 0 0 10px rgba(34, 197, 94, 0.5);
+  text-shadow: 0 0 8px rgba(22, 163, 74, 0.3);
 }
 
-/* Overwrite Leaflet Dark Map styles to match the cyberpunk look */
+/* Overwrite Leaflet Map styles for high contrast Light Mode */
 .leaflet-container {
-  background: #0d131f !important;
+  background: #f8fafc !important;
 }
 
 .leaflet-bar {
-  border: 1px solid rgba(255, 255, 255, 0.15) !important;
-  box-shadow: none !important;
+  border: 1px solid rgba(148, 163, 184, 0.25) !important;
+  box-shadow: 0 2px 4px rgba(15, 23, 42, 0.05) !important;
 }
 
 .leaflet-bar a {
-  background-color: #0f172a !important;
-  color: #f8fafc !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+  background-color: #ffffff !important;
+  color: #1e293b !important;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.15) !important;
   transition: all 0.2s;
 }
 
 .leaflet-bar a:hover {
-  background-color: #1e293b !important;
-  color: #ffffff !important;
+  background-color: #f1f5f9 !important;
+  color: #0f172a !important;
 }
 
 .leaflet-popup-content-wrapper {
-  background: #0f172a !important;
-  color: #f8fafc !important;
-  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  background: #ffffff !important;
+  color: #0f172a !important;
+  border: 1px solid rgba(148, 163, 184, 0.2) !important;
   font-family: 'Space Grotesk', sans-serif !important;
-  border-radius: 8px !important;
+  border-radius: 12px !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
 }
 
 .leaflet-popup-tip {
-  background: #0f172a !important;
-  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  background: #ffffff !important;
+  border: 1px solid rgba(148, 163, 184, 0.2) !important;
 }
 

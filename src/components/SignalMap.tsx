@@ -12,6 +12,7 @@ interface SignalMapProps {
   userLocation: Coordinates;
   selectedStation: TVStation | null;
   onSelectStation: (station: TVStation) => void;
+  onMoveUserLocation?: (coords: Coordinates) => void;
 }
 
 export default function SignalMap({
@@ -19,6 +20,7 @@ export default function SignalMap({
   userLocation,
   selectedStation,
   onSelectStation,
+  onMoveUserLocation,
 }: SignalMapProps) {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
@@ -39,8 +41,8 @@ export default function SignalMap({
       attributionControl: false,
     }).setView([userLocation.latitude, userLocation.longitude], 12);
 
-    // Add CartoDB Dark Matter tile layer for an incredible futuristic aesthetic
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    // Add CartoDB Voyager tile layer for an incredible bright friendly aesthetic
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
       maxZoom: 20,
       minZoom: 4,
     }).addTo(map);
@@ -64,6 +66,27 @@ export default function SignalMap({
     };
   }, []);
 
+  // Update Map click event listener dynamically
+  useEffect(() => {
+    const map = mapInstanceRef.current;
+    if (!map) return;
+
+    const handleMapClick = (e: L.LeafletMouseEvent) => {
+      if (onMoveUserLocation) {
+        onMoveUserLocation({
+          latitude: e.latlng.lat,
+          longitude: e.latlng.lng
+        });
+      }
+    };
+
+    map.on('click', handleMapClick);
+
+    return () => {
+      map.off('click', handleMapClick);
+    };
+  }, [onMoveUserLocation]);
+
   // Update User Location Marker
   useEffect(() => {
     const map = mapInstanceRef.current;
@@ -79,9 +102,9 @@ export default function SignalMap({
       className: 'custom-user-marker',
       html: `
         <div class="relative flex items-center justify-center w-8 h-8">
-          <div class="absolute w-6 h-6 bg-white border border-black rounded-full opacity-30 animate-ping"></div>
-          <div class="absolute w-4 h-4 bg-white border-2 border-black rounded-full shadow-lg flex items-center justify-center">
-            <div class="w-1.5 h-1.5 bg-[#0a0f18] rounded-full"></div>
+          <div class="absolute w-6 h-6 bg-indigo-500 rounded-full opacity-30 animate-ping"></div>
+          <div class="absolute w-4 h-4 bg-indigo-600 border-2 border-white rounded-full shadow-lg flex items-center justify-center">
+            <div class="w-1.5 h-1.5 bg-white rounded-full"></div>
           </div>
         </div>
       `,
@@ -96,9 +119,9 @@ export default function SignalMap({
       .addTo(map)
       .bindPopup(
         `<div class="p-1 font-sans text-xs">
-          <strong class="text-white">Posisi Anda</strong><br/>
-          Lat: ${userLocation.latitude.toFixed(5)}<br/>
-          Lon: ${userLocation.longitude.toFixed(5)}
+          <strong class="text-slate-900">Posisi Anda</strong><br/>
+          <span class="text-slate-600">Lat: ${userLocation.latitude.toFixed(5)}</span><br/>
+          <span class="text-slate-600">Lon: ${userLocation.longitude.toFixed(5)}</span>
          </div>`
       );
 
@@ -126,17 +149,17 @@ export default function SignalMap({
               <div class="absolute w-8 h-8 bg-emerald-500 rounded-full opacity-20 animate-ping"></div>
               <div class="absolute w-4 h-4 bg-emerald-400 rounded-full blur-xs opacity-50"></div>
             ` : `
-              <div class="absolute w-3 h-3 bg-white/20 rounded-full blur-[2px]"></div>
+              <div class="absolute w-3 h-3 bg-indigo-500/10 rounded-full blur-[2px]"></div>
             `}
             <div class="absolute w-5 h-5 flex items-center justify-center rounded-full border ${
-              isSelected ? 'border-emerald-400 bg-[#0d131f] text-emerald-400' : 'border-white/30 bg-[#0a0f18] text-white/70'
+              isSelected ? 'border-emerald-500 bg-emerald-500 text-white' : 'border-slate-300 bg-white text-slate-700'
             } shadow-md transition-all duration-300">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="w-3 h-3">
                 <path d="M12 2v20M17 5H7M15 9H9M19 13H5" />
               </svg>
             </div>
             ${isSelected ? `
-              <div class="absolute -top-1 w-2 h-2 bg-emerald-400 rounded-full animate-bounce"></div>
+              <div class="absolute -top-1 w-2 h-2 bg-emerald-500 rounded-full animate-bounce"></div>
             ` : ''}
           </div>
         `,
@@ -151,17 +174,17 @@ export default function SignalMap({
       });
 
       marker.bindPopup(`
-        <div class="p-2 font-display text-xs text-white max-w-[200px]">
-          <div class="font-bold border-b border-white/10 pb-1 mb-1 flex items-center gap-1">
-            <span class="w-2 h-2 ${isSelected ? 'bg-emerald-400' : 'bg-white/60'} rounded-full"></span>
+        <div class="p-2 font-display text-xs text-slate-800 max-w-[200px]">
+          <div class="font-bold border-b border-slate-100 pb-1 mb-1 flex items-center gap-1 text-slate-900">
+            <span class="w-2 h-2 ${isSelected ? 'bg-emerald-500' : 'bg-slate-400'} rounded-full"></span>
             ${station.name}
           </div>
-          <div class="space-y-1 text-gray-300 font-mono text-[10px]">
-            <p><span class="text-gray-400 font-sans">Mux Operator:</span> ${station.operator}</p>
-            <p><span class="text-gray-400 font-sans">Kanal:</span> Ch ${station.channel} (${station.frequency} MHz)</p>
-            <p><span class="text-gray-400 font-sans">Wilayah Mux:</span> ${station.city}</p>
+          <div class="space-y-1 text-slate-600 font-mono text-[10px]">
+            <p><span class="text-slate-500 font-sans">Mux Operator:</span> ${station.operator}</p>
+            <p><span class="text-slate-500 font-sans">Kanal:</span> Ch ${station.channel} (${station.frequency} MHz)</p>
+            <p><span class="text-slate-500 font-sans">Wilayah Mux:</span> ${station.city}</p>
           </div>
-          <button class="mt-2 w-full bg-white text-black font-semibold font-sans py-1 rounded text-[10px] uppercase hover:bg-gray-200 transition-all">
+          <button class="mt-2 w-full bg-slate-900 text-white font-semibold font-sans py-1.5 rounded text-[10px] uppercase hover:bg-slate-800 transition-all">
             Kunci Arah Sinyal
           </button>
         </div>
@@ -193,12 +216,12 @@ export default function SignalMap({
     const userCoords: [number, number] = [userLocation.latitude, userLocation.longitude];
     const stationCoords: [number, number] = [selectedStation.latitude, selectedStation.longitude];
 
-    // Elegant animated white/grey dash line pointing directly to MUX
+    // Elegant animated indigo dash line pointing directly to MUX
     signalLineRef.current = L.polyline([userCoords, stationCoords], {
-      color: '#ffffff',
-      weight: 3,
-      dashArray: '10, 8',
-      opacity: 0.9,
+      color: '#4f46e5',
+      weight: 3.5,
+      dashArray: '8, 8',
+      opacity: 0.85,
       lineCap: 'round',
       lineJoin: 'round',
     }).addTo(map);
@@ -209,9 +232,9 @@ export default function SignalMap({
       radius: 15000,
       color: '#10b981',
       fillColor: '#10b981',
-      fillOpacity: 0.03,
-      weight: 1,
-      dashArray: '5, 5',
+      fillOpacity: 0.04,
+      weight: 1.5,
+      dashArray: '4, 4',
     }).addTo(circlesGroup);
 
     // Maximum Fringe Area = 55km
@@ -219,9 +242,9 @@ export default function SignalMap({
       radius: 55000,
       color: '#ef4444',
       fillColor: '#ef4444',
-      fillOpacity: 0.01,
-      weight: 1,
-      dashArray: '10, 10',
+      fillOpacity: 0.02,
+      weight: 1.5,
+      dashArray: '8, 8',
     }).addTo(circlesGroup);
 
     // Fit map bounds to encompass user and target cleanly
@@ -234,10 +257,10 @@ export default function SignalMap({
   }, [selectedStation, userLocation]);
 
   return (
-    <div className="relative w-full h-full rounded-2xl overflow-hidden border border-white/10 shadow-2xl">
+    <div className="relative w-full h-full rounded-2xl overflow-hidden border border-slate-200/80 shadow-lg">
       {/* Visual coordinates bar */}
-      <div className="absolute top-3 left-3 z-[1000] flex items-center gap-1.5 px-3 py-1.5 bg-[#0a0f18]/95 backdrop-blur-md rounded-md border border-white/10 shadow-lg text-[10px] font-mono text-white/80">
-        <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></span>
+      <div className="absolute top-3 left-3 z-[1000] flex items-center gap-1.5 px-3 py-1.5 bg-white/95 backdrop-blur-md rounded-lg border border-slate-200 shadow-md text-[10px] font-mono text-slate-800">
+        <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
         <span>LAT: {userLocation.latitude.toFixed(5)}</span>
         <span>|</span>
         <span>LON: {userLocation.longitude.toFixed(5)}</span>
@@ -246,13 +269,13 @@ export default function SignalMap({
       <div ref={mapContainerRef} className="w-full h-full" id="map-radar-stage" />
 
       {/* Tech indicators overlay */}
-      <div className="absolute bottom-4 right-4 z-[1000] flex flex-col gap-1 text-[9px] font-mono text-white/50 bg-[#0d131f]/90 px-3 py-2 rounded border border-white/10">
+      <div className="absolute bottom-4 right-4 z-[1000] flex flex-col gap-1 text-[9px] font-mono text-slate-600 bg-white/95 px-3 py-2 rounded-lg border border-slate-200 shadow-md">
         <div className="flex items-center gap-1.5">
-          <span className="w-2.5 h-0.5 bg-emerald-500 inline-block"></span>
+          <span className="w-2.5 h-1 bg-emerald-500 rounded-sm inline-block"></span>
           <span>Sinyal Kuat (&lt;15 km)</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <span className="w-2.5 h-0.5 bg-red-500 inline-block"></span>
+          <span className="w-2.5 h-1 bg-red-500 rounded-sm inline-block"></span>
           <span>Batas Sinyal (&lt;55 km)</span>
         </div>
       </div>
