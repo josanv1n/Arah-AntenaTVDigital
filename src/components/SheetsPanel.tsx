@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { FileSpreadsheet, RefreshCw } from 'lucide-react';
+import { useState } from 'react';
+import { FileSpreadsheet, RefreshCw, Settings, Check, ExternalLink } from 'lucide-react';
 
 interface SheetLog {
   timestamp: string;
@@ -30,10 +31,20 @@ export default function SheetsPanel({
   logs,
   onManualSync,
 }: SheetsPanelProps) {
+  const [showConfig, setShowConfig] = useState(false);
+  const [tempUrl, setTempUrl] = useState(appScriptUrl);
+  const [isSaved, setIsSaved] = useState(false);
+
+  const handleSave = () => {
+    onUpdateUrl(tempUrl);
+    setIsSaved(true);
+    setTimeout(() => setIsSaved(false), 2000);
+  };
+
   return (
     <div className="cyber-panel p-5 rounded-2xl border border-slate-200/80 shadow-lg flex flex-col h-full text-slate-800 min-h-[340px]">
       {/* Title & Spreadsheet Quick Link */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3.5 mb-4">
+      <div className="flex items-center justify-between border-b border-slate-100 pb-3.5 mb-4">
         <div className="flex items-center gap-2">
           <FileSpreadsheet className="w-5 h-5 text-emerald-600 animate-pulse" />
           <div>
@@ -41,7 +52,55 @@ export default function SheetsPanel({
             <p className="text-[9px] text-emerald-600 font-mono tracking-wider font-bold mt-0.5">Google Sheets Cloud Sync Aktif</p>
           </div>
         </div>
+        
+        {/* Toggle Settings Gear */}
+        <button
+          onClick={() => setShowConfig(!showConfig)}
+          className={`p-1.5 rounded-lg border transition-all cursor-pointer ${
+            showConfig 
+              ? 'bg-slate-100 border-slate-200 text-slate-950' 
+              : 'bg-white border-slate-100 text-slate-400 hover:text-slate-600 hover:border-slate-200'
+          }`}
+          title="Atur URL Google Apps Script"
+        >
+          <Settings className={`w-4 h-4 ${showConfig ? 'rotate-45' : ''} transition-transform duration-300`} />
+        </button>
       </div>
+
+      {/* Collapsible Config Input */}
+      {showConfig && (
+        <div className="mb-4 p-3 bg-slate-50 border border-slate-200/60 rounded-xl text-[10px] animate-fadeIn transition-all">
+          <div className="font-bold text-slate-700 mb-1 flex items-center justify-between">
+            <span>⚙️ KONFIGURASI WEB APP URL:</span>
+            <a 
+              href="https://docs.google.com/spreadsheets/d/1jHxBbN5zacD9hBClTHTiimRk2cVCCxlYOXHg9OBFU9w/edit" 
+              target="_blank" 
+              referrerPolicy="no-referrer"
+              className="text-emerald-600 font-semibold hover:underline flex items-center gap-0.5"
+            >
+              Buka Spreadsheet <ExternalLink className="w-2.5 h-2.5" />
+            </a>
+          </div>
+          <p className="text-slate-500 mb-2 leading-relaxed">
+            Agar data otomatis tercatat ke Spreadsheet Anda, tempel URL Web App dari menu <strong>Deploy &gt; New Deployment (Web App)</strong> di Apps Script Anda:
+          </p>
+          <div className="flex gap-1.5">
+            <input
+              type="text"
+              value={tempUrl}
+              onChange={(e) => setTempUrl(e.target.value)}
+              placeholder="https://script.google.com/macros/s/.../exec"
+              className="flex-1 px-2.5 py-1.5 text-[10px] font-mono border border-slate-200 rounded-lg bg-white focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
+            />
+            <button
+              onClick={handleSave}
+              className="flex items-center gap-1 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-mono font-bold transition-all cursor-pointer shadow-sm"
+            >
+              {isSaved ? <Check className="w-3.5 h-3.5" /> : 'Simpan'}
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Logs Table Content */}
       <div className="flex-1 flex flex-col justify-between overflow-hidden">
